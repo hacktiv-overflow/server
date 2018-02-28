@@ -1,13 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// $Questions=
-//  --Question: String, Required
-//  --User: ObjectId, ref:User
-//  --Answers: [ObjectId, ref:Answer]
-//  --UpVotes: [ObjectId, ref:User]
-//  --DownVotes: [ObjectId, ref:User]
-
 const questionSchema = new Schema({
   question: {
     type: String,

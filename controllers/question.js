@@ -1,4 +1,5 @@
 const question = require('../models/Question');
+const user = require('../models/User');
 
 class Question {
   static createOne(req,res){
@@ -10,10 +11,31 @@ class Question {
       question: input.question,
       user: input.user
     }).then(result => {
-      res.status(200)
-      .json({
-        msg: 'New question submitted',
-        question: result
+      user.findOne({
+        '_id':input.user
+      }).then(userData => {
+        userData.questions.push(result._id)
+        userData.save()
+        .then(jointData => {
+          res.status(200)
+          .json({
+            msg: 'New question submitted',
+            question: result,
+            user: jointData
+          })
+        }).catch(err => {
+          res.status(500)
+          .json({
+            msg: 'Unable to add question to user',
+            error: err
+          })
+        })
+      }).catch(err => {
+        res.status(500)
+        .json({
+          msg: 'Unable to find user',
+          error: err
+        })
       })
     }).catch(err => {
       res.status(500)
@@ -98,12 +120,12 @@ class Question {
   static voteDown (req,res){
     question.findOne({'_id': req.params.id})
     .then(result => {
-      result.upVotes.push(req.body.user_id)
+      result.downVotes.push(req.body.user_id)
       result.save()
         .then(updated => {
           res.status(200)
           .json({
-            msg: `User_id: ${req.body.user_id} voted up`,
+            msg: `User_id: ${req.body.user_id} voted down`,
             votes: updated
           })
         }).catch(err => {
@@ -116,7 +138,7 @@ class Question {
     }).catch(err => {
       res.status(500)
       .json({
-        msg: 'Vote up error',
+        msg: 'Vote down error',
         error: err
       })
     })
